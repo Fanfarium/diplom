@@ -1,2 +1,0 @@
-FrontEnd/my-app/src/api/axios.js
-BackEnd/Amazon-clone/ShopApi/appsettings.json
