@@ -24,7 +24,6 @@ pipeline {
                 script {
                     sh 'cd /home/ubuntu/diplom/FrontEnd/my-app'
                     sh 'docker build -t manyok007/frontend:version${BUILD_NUMBER} .'
-                    sh 'docker push manyok007/frontend:version${BUILD_NUMBER}'
                 }
             }
         }
@@ -34,7 +33,6 @@ pipeline {
                 script {
                     sh 'cd /home/ubuntu/diplom/BackEnd/Amazone-clone'
                     sh 'docker build -t manyok007/beck:version${BUILD_NUMBER} .'
-                    sh 'docker push manyok007/beck:version${BUILD_NUMBER}'
                 }
             }
         }
