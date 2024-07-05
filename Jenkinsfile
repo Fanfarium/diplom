@@ -3,16 +3,14 @@ pipeline {
 
     environment {
         DOCKER_CREDENTIALS_ID = '5dd6653b-26fa-486e-8503-2af4a5605588'
-        CONTAINER_NAME_FRONTEND = 'manyok007/frontend'
-        CONTAINER_NAME_BACKEND = 'manyok007/beck'
-        CONTAINER_NAME_DB = 'manyok007/mssql-server'
+        CONTAINER_NAME_FRONTEND = 'manyok007/diplom'
     }
 
     stages {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'slon68766', usernameVariable: 'manyok007')]) {
+                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         sh 'docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD'
                     }
                 }
@@ -23,43 +21,26 @@ pipeline {
             steps {
                 script {
                     sh 'cd /home/ubuntu/diplom/FrontEnd/my-app'
-                    sh 'docker build -t manyok007/frontend:version${BUILD_NUMBER} .'
+                    sh 'docker build -t manyok007/diplom:version${BUILD_NUMBER} .'
+                    sh 'docker push manyok007/diplom:version${BUILD_NUMBER}'
                 }
             }
         }
 
-        stage('Build Backend Docker Image') {
-            steps {
-                script {
-                    sh 'cd /home/ubuntu/diplom/BackEnd/Amazone-clone'
-                    sh 'docker build -t manyok007/beck:version${BUILD_NUMBER} .'
-                }
-            }
-        }
 
         stage('Tagging images') {
             steps {
                 script {
-                    sh 'docker tag manyok007/frontend:version${BUILD_NUMBER} manyok007/frontend:latest'
-                    sh 'docker tag manyok007/beck:version${BUILD_NUMBER} manyok007/beck:latest'
+                    sh 'docker tag manyok007/diplom:version${BUILD_NUMBER} manyok007/diplom:latest'
                 }
             }
         }
 
-        stage('Push Backend Docker Image') {
+        stage('Push Docker Image') {
             steps {
                 script {
-                    sh 'docker push manyok007/beck:version${BUILD_NUMBER}'
-                    sh 'docker push manyok007/beck:latest'
-                }
-            }
-        }
-
-        stage('Push Frontend Docker Image') {
-            steps {
-                script {
-                    sh 'docker push manyok007/frontend:version${BUILD_NUMBER}'
-                    sh 'docker push manyok007/frontend:latest'
+                    sh 'docker push manyok007/diplom:version${BUILD_NUMBER}'
+                    sh 'docker push manyok007/diplom:latest'
                 }
             }
         }
@@ -86,9 +67,7 @@ pipeline {
         stage('Run Docker Containers') {
             steps {
                 script {
-                    sh 'docker run -d -p 8080:80 --name manyok007/frontend manyok007/frontend:version${BUILD_NUMBER}'
-                    sh 'docker run -d -p 5034:5034 --name manyok007/beck manyok007/beck:version${BUILD_NUMBER}'
-                    sh 'docker run -e "ACCEPT_EULA=Y" -e "MYSQL_SA_PASSWORD=Qwerty-1" -p 1433:1433 --name sql111 --hostname sql1 -d manyok007/mssql-server:version${BUILD_NUMBER}'
+                    sh 'docker run -d -p 8081:80 --name ${CONTAINER_NAME} --health-cmd="curl --fail http://localhost:80 || exit 1" manyok007/diplom:version${BUILD_NUMBER}'
                 }
             }
         }
