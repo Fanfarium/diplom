@@ -20,7 +20,6 @@ pipeline {
         stage('Build Frontend Docker Image') {
             steps {
                 script {
-                    sh 'cd /home/ubuntu/diplom/FrontEnd/my-app'
                     sh 'docker build -t manyok007/diplom:version${BUILD_NUMBER} .'
                     sh 'docker push manyok007/diplom:version${BUILD_NUMBER}'
                 }
