@@ -21,7 +21,6 @@ pipeline {
             steps {
                 script {
                     sh 'docker build -t manyok007/diplom:version${BUILD_NUMBER} .'
-                    sh 'docker push manyok007/diplom:version${BUILD_NUMBER}'
                 }
             }
         }
