@@ -2,70 +2,76 @@ pipeline {
     agent any
 
     environment {
+        // Додаємо креденшіали для Docker
         DOCKER_CREDENTIALS_ID = '5dd6653b-26fa-486e-8503-2af4a5605588'
-        CONTAINER_NAME_FRONTEND = 'manyok007/diplom'
+        CONTAINER_NAME = 'manyok007/diplom'
     }
+   
 
     stages {
-        stage('Login to Docker Hub') {
+        
+        
+       stage('Вхід у Docker') {
             steps {
                 script {
+                    // Використовуємо креденшіали з Jenkins для входу в Docker
                     withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh 'docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD'
+                        sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
                     }
                 }
             }
         }
 
-        stage('Build Frontend Docker Image') {
+        stage('Білд Docker зображення') {
             steps {
                 script {
-                    sh 'docker build -t manyok007/diplom:version${BUILD_NUMBER} .'
+                    // Будуємо Docker зображення
+                    sh 'docker build -t manyok007/frontend:version${BUILD_NUMBER} .'
                 }
             }
         }
 
-
-        stage('Tagging images') {
+          stage('Тегування Docker зображення') {
             steps {
                 script {
-                    sh 'docker tag manyok007/diplom:version${BUILD_NUMBER} manyok007/diplom:latest'
+                    // Додаємо тег 'latest' до збудованого образу
+                    sh 'docker tag manyok007/frontend:version${BUILD_NUMBER} manyok007/frontend:latest'
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Пуш у Docker Hub') {
             steps {
                 script {
-                    sh 'docker push manyok007/diplom:version${BUILD_NUMBER}'
-                    sh 'docker push manyok007/diplom:latest'
+                    // Пушимо зображення на Docker Hub
+                    sh 'docker push manyok007/frontend:version${BUILD_NUMBER}'
+                    sh 'docker push manyok007/frontend:latest'
                 }
             }
         }
 
-        stage('Stop and Remove Old Containers') {
+        stage('Зупинка та видалення старого контейнера') {
             steps {
                 script {
-                    def removeContainers = { containerName ->
-                        sh """
-                        if [ \$(docker ps -aq -f name=${containerName}) ]; then
-                            docker stop ${containerName}
-                            docker rm ${containerName}
-                        else
-                            echo "Контейнер ${containerName} не знайдено. Продовжуємо..."
-                        fi
-                        """
-                    }
-                    removeContainers(CONTAINER_NAME_FRONTEND)
-                    removeContainers(CONTAINER_NAME_BACKEND)
+                    // Спроба зупинити та видалити старий контейнер, якщо він існує
+                    sh """
+                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME}\$) ]; then
+                        docker stop ${CONTAINER_NAME}
+                        docker rm ${CONTAINER_NAME}
+                    else
+                        echo "Контейнер ${CONTAINER_NAME} не знайдено. Продовжуємо..."
+                    fi
+                    """
                 }
             }
         }
-
-        stage('Run Docker Containers') {
+        
+        stage('Запуск Docker контейнера') {
             steps {
                 script {
-                    sh 'docker run -d -p 8081:80 --name ${CONTAINER_NAME} --health-cmd="curl --fail http://localhost:80 || exit 1" manyok007/diplom:version${BUILD_NUMBER}'
+                    // Запускаємо Docker контейнер з новим зображенням
+                    sh 'docker run -d -p 8081:80 --name ${CONTAINER_NAME} --health-cmd="curl --fail http://localhost:80 || exit 1" manyok007/frontend:version${BUILD_NUMBER}'
+
                 }
             }
         }
