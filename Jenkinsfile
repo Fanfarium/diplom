@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Додаємо креденшіали для Docker
-        DOCKER_CREDENTIALS_ID = '5dd6653b-26fa-486e-8503-2af4a5605588'
+        DOCKER_CREDENTIALS_ID = 'c76628ef-2b8b-4440-9c99-623a876146f2'
         CONTAINER_NAME = 'manyok007/diplom'
     }
    
