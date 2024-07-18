@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Додаємо креденшіали для Docker
-        DOCKER_CREDENTIALS_ID = 'c76628ef-2b8b-4440-9c99-623a876146f2'
+        DOCKER_CREDENTIALS_ID = 'cbf1cf9c-19ef-48a8-8911-074bdf12b75e'
         CONTAINER_NAME = 'manyok007/diplom'
     }
    
@@ -25,8 +25,8 @@ pipeline {
         stage('Білд Docker зображення') {
             steps {
                 script {
-                    // Будуємо Docker зображення
-                    sh 'docker build -t manyok007/frontend:version${BUILD_NUMBER} .'
+                    sh 'docker build -t manyok007/diplom:frontend-${BUILD_NUMBER} .'
+                    sh 'docker build -t manyok007/diplom:backend-${BUILD_NUMBER} .'
                 }
             }
         }
